@@ -14,6 +14,8 @@ from app.models.mixins import TimestampMixin, UUIDPrimaryKeyMixin
 if TYPE_CHECKING:
     from app.models.department import Department
     from app.models.employee import Employee
+    from app.models.project import Project
+    from app.models.task import Task
     from app.models.user import User
 
 
@@ -40,6 +42,8 @@ class Employer(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     department: Mapped[Department | None] = relationship(lazy="joined")
     user: Mapped[User] = relationship(back_populates="employer_profile", lazy="joined")
     managed_employees: Mapped[list[Employee]] = relationship(back_populates="employer")
+    projects: Mapped[list[Project]] = relationship(back_populates="owner")
+    assigned_tasks: Mapped[list[Task]] = relationship(back_populates="assigner")
 
     __table_args__ = (Index("ix_employers_company_id", "company_id"),)
 

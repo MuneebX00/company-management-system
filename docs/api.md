@@ -9,7 +9,7 @@ Base path: `/api/v1`. JSON, REST. Swagger: http://127.0.0.1:8000/docs.
 - **Pagination** (`Page[T]`): `?page=1&page_size=20` returns `{items, page, page_size, total}`.
 - **Auth**: `Authorization: Bearer <access_token>` on protected endpoints.
 
-## Endpoints (Phase 4)
+## Endpoints (Phase 5)
 
 ### Health
 
@@ -108,6 +108,36 @@ Attendance list/get is role-scoped (same rule as employees): admin all, employer
 **Leave rules**: `days = (end - start) + 1`; overlapping PENDING/APPROVED requests for the same
 employee are rejected with 409; only PENDING requests can be updated/approved/rejected/cancelled.
 
+### Projects
+
+| Method | Path | Auth | Description |
+| --- | --- | --- | --- |
+| GET | `/projects` | `project.view` | List projects in caller's scope (paginated) |
+| GET | `/projects/{id}` | `project.view` | Get project in scope (404 out of scope/cross-company) |
+| POST | `/projects` | `project.create` | Create project (409 dup name) |
+| PATCH | `/projects/{id}` | `project.update` | Update project (name/status/owner/dates) |
+| DELETE | `/projects/{id}` | `project.update` | Delete project (cascades tasks + members, 204) |
+| POST | `/projects/{id}/members` | `project.member_manage` | Add employee as member (409 dup, 404 foreign employee) |
+| GET | `/projects/{id}/members` | `project.view` | List project members |
+| DELETE | `/projects/{id}/members/{employee_id}` | `project.member_manage` | Remove a member (204) |
+
+**Project scope**: ADMIN_HR sees all company projects; EMPLOYER sees only projects they own
+(`owner_id == their profile`); employees have no `project.view` permission. Out-of-scope → 404.
+
+### Tasks
+
+| Method | Path | Auth | Description |
+| --- | --- | --- | --- |
+| GET | `/tasks` | `task.view` | List tasks in caller's scope (paginated) |
+| GET | `/tasks/{id}` | `task.view` | Get task in scope (404 out of scope) |
+| POST | `/tasks` | `task.create` | Create task in a project (404 foreign project/assignee) |
+| PATCH | `/tasks/{id}` | `task.update` | Update task; sets/clears `completed_at` on DONE |
+| POST | `/tasks/{id}/assign` | `task.assign` | Assign task to an employee in scope |
+
+**Task scope**: ADMIN_HR sees all company tasks; EMPLOYER sees tasks in projects they own;
+EMPLOYEE sees only tasks assigned to them. Employees may only update `status`/`description`
+of their own tasks (403 otherwise); completing a task sets `completed_at`.
+
 ## Tenant isolation
 
 All Phase 3 read/write operations are scoped to the caller's company via
@@ -167,4 +197,4 @@ Content-Type: application/json
 }
 ```
 
-Later phases add projects, tasks, payroll, notifications and AI endpoints.
+Later phases add payroll, notifications and AI endpoints.

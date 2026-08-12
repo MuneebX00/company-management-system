@@ -29,9 +29,9 @@ The local `pg_hba.conf` uses `trust` for localhost, so no password is actually s
 - **Unique constraints**: only where globally meaningful (`users.email`). Company-scoped uniqueness (e.g. `employee_number` within a company) uses composite unique constraints `(company_id, field)` — never global unique on company-scoped data.
 - **Naming**: `snake_case` tables, plural for tables (`users`, `departments`).
 
-## Current schema (Phase 4)
+## Current schema (Phase 5)
 
-Applied migrations: `d11ebce71a1d` (baseline) → `75faba76c496` (auth/RBAC) → `ba4e58651ce0` (organization) → `03319d823fe2` (employment status check) → `121ff0cdec62` (attendance & leave).
+Applied migrations: `d11ebce71a1d` (baseline) → `75faba76c496` (auth/RBAC) → `ba4e58651ce0` (organization) → `03319d823fe2` (employment status check) → `121ff0cdec62` (attendance & leave) → `4542d7e50d47` (projects, members, tasks).
 
 | Table | Purpose |
 | --- | --- |
@@ -46,6 +46,9 @@ Applied migrations: `d11ebce71a1d` (baseline) → `75faba76c496` (auth/RBAC) →
 | `leave_types` | Company leave categories (unique `(company_id, name)`) |
 | `leave_requests` | Employee leave requests + review fields |
 | `attendance_records` | One record per employee per work date |
+| `projects` | Company projects owned by employers |
+| `project_members` | N:M employees ↔ projects (composite PK, optional role) |
+| `tasks` | Work items within a project, optionally assigned to an employee |
 
 ### employees
 
@@ -67,10 +70,26 @@ Applied migrations: `d11ebce71a1d` (baseline) → `75faba76c496` (auth/RBAC) →
 - `reviewed_by` → `users.id` (the approving/rejecting user); NULL until reviewed.
 - Overlap (same employee, PENDING/APPROVED, date-range intersection) is enforced in the service layer.
 
+### projects
+
+- Unique `(company_id, name)` — project names are only unique within a company.
+- `owner_id` → `employers.id` `ON DELETE SET NULL` (owning manager); `created_by` → `users.id`.
+- `status` is `VARCHAR(20)` with a CHECK constraint restricting to `NOT_STARTED / IN_PROGRESS / ON_HOLD / COMPLETED / CANCELLED`.
+
+### project_members
+
+- Composite PK `(project_id, employee_id)`; both FKs `ON DELETE CASCADE` (no orphans).
+- `role` is a free-text label (`String(100)`), e.g. "Developer".
+
+### tasks
+
+- `project_id` `ON DELETE CASCADE` (deleting a project removes its tasks); `assigned_to` → `employees.id` and `assigned_by` → `employers.id` `ON DELETE SET NULL`.
+- `status` CHECK: `TODO / IN_PROGRESS / IN_REVIEW / DONE / CANCELLED`; `priority` CHECK: `LOW / MEDIUM / HIGH / URGENT`.
+- `completed_at` is set (UTC) when status becomes `DONE` and cleared otherwise.
+
 Planned tables (later phases):
 
 - **Payroll**: `salary_structures`, `payroll_periods`, `payroll_records`, `payslips`
-- **Projects**: `projects`, `project_members`, `tasks`
 - **System**: `notifications`, `audit_logs`
 - **AI**: `ai_insights`, `ai_usage_logs`
 

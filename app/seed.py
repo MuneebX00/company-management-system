@@ -53,12 +53,12 @@ def seed_dev_company_and_admin(db: Session) -> None:
     """Create a development company and ADMIN_HR account. Dev-only."""
     settings = get_settings()
 
-    company = db.scalar(select(Company).where(Company.name == "Acme Corporation"))
+    company = db.scalar(select(Company).where(Company.name == "MkTech"))
     if company is None:
-        company = Company(name="Acme Corporation", email="admin@example.com")
+        company = Company(name="MkTech", email="admin@mktech.com")
         db.add(company)
         db.flush()
-        logger.info("Seeded development company 'Acme Corporation'")
+        logger.info("Seeded development company 'MKTech'")
 
     admin_role = db.scalar(select(Role).where(Role.name == RoleName.ADMIN_HR))
     if admin_role is None:

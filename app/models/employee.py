@@ -17,6 +17,8 @@ if TYPE_CHECKING:
     from app.models.department import Department
     from app.models.employer import Employer
     from app.models.leave import LeaveRequest
+    from app.models.project import ProjectMember
+    from app.models.task import Task
     from app.models.user import User
 
 
@@ -55,6 +57,8 @@ class Employee(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     user: Mapped[User] = relationship(back_populates="employee_profile", lazy="joined")
     attendance_records: Mapped[list[AttendanceRecord]] = relationship(back_populates="employee")
     leave_requests: Mapped[list[LeaveRequest]] = relationship(back_populates="employee")
+    project_memberships: Mapped[list[ProjectMember]] = relationship(back_populates="employee")
+    tasks: Mapped[list[Task]] = relationship(back_populates="assignee")
 
     __table_args__ = (
         UniqueConstraint("company_id", "employee_number", name="uq_employees_company_number"),

@@ -4,8 +4,8 @@ Role-based Company Management System backend built with FastAPI, SQLAlchemy 2.x 
 
 ## Status
 
-Phase 4 (Attendance & Leave) complete — check-in/check-out with hours computation, admin attendance corrections, company leave types, and the full request → approve/reject/cancel workflow with overlap protection. This builds on Phase 3 (Company & Organization): companies, departments, employer and employee profiles with backend-enforced tenant isolation and role-based scoping, plus Phase 2 (Authentication & RBAC).
-Later phases add projects/tasks, payroll, notifications, audit and AI foundations.
+Phase 5 (Projects & Tasks) complete — projects owned by employers, member management, and tasks with assignment, status/priority tracking and completion timestamps. Project and task visibility is role-scoped (admin sees all, employers see their own projects/team, employees see only tasks assigned to them), and deleting a project cascades to its tasks and members. This builds on Phase 4 (Attendance & Leave), Phase 3 (Company & Organization): companies, departments, employer and employee profiles with backend-enforced tenant isolation and role-based scoping, plus Phase 2 (Authentication & RBAC).
+Later phases add payroll, notifications, audit and AI foundations.
 
 ## Tech stack
 
@@ -149,11 +149,13 @@ app/
 │   ├── employers.py      # Manager profiles (1:1 EMPLOYER users)
 │   ├── employees.py      # Employee profiles + role-scoped visibility
 │   ├── attendance.py     # Check-in/out, corrections
-│   └── leave.py          # Leave types + request workflow
+│   ├── leave.py          # Leave types + request workflow
+│   ├── projects.py       # Projects + member management
+│   └── tasks.py          # Tasks + assignment
 ├── core/                 # Config, logging, database, exceptions, security, roles, enums
-├── models/               # SQLAlchemy models (company, department, employer, employee, ...)
+├── models/               # SQLAlchemy models (company, department, employer, employee, project, task, ...)
 ├── schemas/              # Pydantic schemas
-├── services/             # Business logic (auth, org tenant-scoping)
+├── services/             # Business logic (auth, org tenant-scoping, projects)
 ├── dependencies/         # get_current_user, require_role/permission, session
 ├── seed.py               # Idempotent dev seeding
 ├── middleware/
@@ -169,7 +171,7 @@ docs/                     # Design documentation
 
 - **Layered**: `api` (HTTP) → `dependencies`/`services` (logic) → `models` (ORM). Repositories are only introduced where they add real value.
 - **Sync SQLAlchemy**: the domain is CRUD-heavy and does not need async I/O; FastAPI runs sync endpoints in a thread pool. Async is introduced only where it provides a real benefit.
-- **Tenant isolation**: company-scoped resources carry `company_id`; authorization enforces company boundaries at the backend (Phase 4 complete). Employee/attendance/leave visibility is further scoped by role: admin sees all, employers see their team, employees see only themselves.
+- **Tenant isolation**: company-scoped resources carry `company_id`; authorization enforces company boundaries at the backend (Phase 5 complete). Employee/attendance/leave/project/task visibility is further scoped by role: admin sees all, employers see their team, employees see only themselves.
 - **Money**: `Numeric(12, 2)` — no floating point for monetary values (Phase 7).
 
 See `docs/architecture.md` and `docs/database.md` for details.

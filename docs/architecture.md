@@ -52,6 +52,11 @@ The same scoping is applied to attendance records and leave requests via
 `app/services/attendance.py` / `app/services/leave.py`. An employer can approve/reject leave only
 for their own team; an employee can only see/cancel their own requests.
 
+Projects and tasks reuse the same model (`app/services/projects.py`): an employer sees only
+projects they own and tasks in those projects; employees see only tasks assigned to them.
+Project deletion cascades to tasks and member links via DB-level `ON DELETE CASCADE`
+(`passive_deletes=True` on the `Project.tasks` relationship).
+
 ### Money
 Monetary values use `Numeric(12, 2)` via SQLAlchemy `Numeric`, and calculations use `decimal.Decimal`. No floating point anywhere in payroll.
 
@@ -94,5 +99,6 @@ Monetary values use `Numeric(12, 2)` via SQLAlchemy `Numeric`, and calculations 
 1. ~~Auth & RBAC~~ — users/roles/permissions, JWT (access + refresh), Argon2, `require_role`/`require_permission`. **Done.**
 2. ~~Organization~~ — companies, departments, employers, employees. **Done.**
 3. ~~Attendance & Leave~~ — check-in/out, corrections, leave types, request/approve/reject/cancel. **Done.**
-4. Projects/tasks, payroll, notifications, audit logs.
-5. AI foundation: provider-agnostic service interfaces (`ai_insights`, `ai_usage_logs`) so providers plug in without restructuring.
+4. ~~Projects & Tasks~~ — projects, members, tasks with employer/employee scoping. **Done.**
+5. Payroll, notifications, audit logs.
+6. AI foundation: provider-agnostic service interfaces (`ai_insights`, `ai_usage_logs`) so providers plug in without restructuring.

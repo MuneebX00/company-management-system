@@ -9,6 +9,8 @@ from app.api.v1 import (
     employers,
     health,
     leave,
+    projects,
+    tasks,
     users,
 )
 
@@ -23,3 +25,5 @@ api_router.include_router(employers.router, prefix="/employers", tags=["employer
 api_router.include_router(employees.router, prefix="/employees", tags=["employees"])
 api_router.include_router(attendance.router, prefix="/attendance", tags=["attendance"])
 api_router.include_router(leave.router, prefix="/leave", tags=["leave"])
+api_router.include_router(projects.router, prefix="/projects", tags=["projects"])
+api_router.include_router(tasks.router, prefix="/tasks", tags=["tasks"])

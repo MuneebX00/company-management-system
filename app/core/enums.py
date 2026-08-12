@@ -21,3 +21,26 @@ class LeaveStatus(StrEnum):
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
     CANCELLED = "CANCELLED"
+
+
+class ProjectStatus(StrEnum):
+    NOT_STARTED = "NOT_STARTED"
+    IN_PROGRESS = "IN_PROGRESS"
+    ON_HOLD = "ON_HOLD"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+
+
+class TaskStatus(StrEnum):
+    TODO = "TODO"
+    IN_PROGRESS = "IN_PROGRESS"
+    IN_REVIEW = "IN_REVIEW"
+    DONE = "DONE"
+    CANCELLED = "CANCELLED"
+
+
+class TaskPriority(StrEnum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    URGENT = "URGENT"
